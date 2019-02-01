@@ -391,7 +391,9 @@ class fauxApiPfsenseInterface {
         while($wait_count_seconds < $this->config_reload_max_wait_secs) {
             
             // induce the pfsense config.cache to regenerate by requesting index.php
-            $cache_respawn_url = fauxApiUtils::get_request_scheme() . '://127.0.0.1/index.php?__fauxapi_callid='.FAUXAPI_CALLID;
+            $scheme = fauxApiUtils::get_request_scheme();
+            $port = fauxApiUtils::get_request_port();
+            $cache_respawn_url = $scheme . '://127.0.0.1:' . $port . '/index.php?__fauxapi_callid='.FAUXAPI_CALLID;
             $exec_command = 'curl --silent --insecure "'.addslashes($cache_respawn_url).'" > /dev/null';
             // unable to call file_get_contents() to a URL thus we resort to an exec!!
             fauxApiLogger::debug('exec curl', array(
@@ -733,6 +735,15 @@ class fauxApiPfsenseInterface {
             'includes' => $includes,
         ));
         
+        if(!is_file($this->config_pfsense_function_calls)) {
+            $error_message = 'required pfsense function calls file not found';
+            $error_data = array(
+                'filename' => $this->config_pfsense_function_calls
+            );
+            fauxApiLogger::error($error_message, $error_data);
+            throw new \Exception($error_message);
+        }
+        
         // load and parse pfsense_function_calls.txt
         $pf_function_calls_raw = file_get_contents($this->config_pfsense_function_calls);
         $pf_function_calls = array();
@@ -759,8 +770,8 @@ class fauxApiPfsenseInterface {
                 if(count($fn_matches) < 2) {
                     continue 1; 
                 }
-                if (isset($fn_matches[2]) && strlen($fn_matches[2]) > 0) {
-                    $fn_args = split(',',str_replace(' ','', $fn_matches[2]));
+                if(isset($fn_matches[2]) && strlen($fn_matches[2]) > 0) {
+                    $fn_args = explode(',',str_replace(' ','', $fn_matches[2]));
                 } else {
                     $fn_args = array();
                 }

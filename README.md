@@ -76,6 +76,9 @@ Refer to the published package [`SHA256SUMS`](https://github.com/ndejong/pfsense
 **Hint:** if not already, consider installing the `jq` tool on your local machine (not 
 pfSense host) to pipe and manage JSON outputs from FauxAPI - https://stedolan.github.io/jq/
 
+**NB:** you MUST at least setup your `/etc/fauxapi/credentials.ini` file on the 
+pfSense host before you continue, see the API Authentication section below.
+
 ## Client libraries
 
 #### Python
@@ -100,10 +103,12 @@ to observe worked examples with the library.  Of small note is that the Python
 library supports the ability to get and set single sections of the pfSense 
 system, not just the entire system configuration as with the Bash library.
 
-**update-aws-aliases.py** - a reasonable Python based worked example using the API can 
-be found with `update-aws-aliases.py` under the [`extras/examples`](https://github.com/ndejong/pfsense_fauxapi/blob/master/extras/examples) 
-path - the tool pulls in the latest AWS `ip-ranges.json` parses them and injects them 
-into the aliases section if required. 
+**Python examples**
+ - `usergroup-management.py` - example code that provides the ability to `get_users`, 
+   `add_user`, `manage_user`, `remove_user` and perform the same functions on groups.
+ - `update-aws-aliases.py` - example code that pulls in the latest AWS `ip-ranges.json` 
+   data, parses it and injects them into the pfSense aliases section if required.
+ - [github.com/ndejong/pfsense_fauxapi/blob/master/extras/examples](https://github.com/ndejong/pfsense_fauxapi/blob/master/extras/examples)
 
 #### Bash
 The [Bash client library](https://github.com/ndejong/pfsense_fauxapi/tree/master/extras/client-libs) 
@@ -122,9 +127,9 @@ It is recommended to review [`bash-lib-iterate.sh`](https://github.com/ndejong/p
 to get a better idea how to use it.
 
 #### PHP
-A PHP interface does not yet exist, it should be fairly easy to develop by 
-observing the Bash and Python examples - if you do please submit it as a github 
-pull request, there are no doubt others that will appreciate a PHP interface.
+A PHP client has been developed by a third party and is available here
+ - [github.com/travisghansen/pfsense_fauxapi_php_client](https://github.com/travisghansen/pfsense_fauxapi_php_client)
+ - [packagist.org/packages/travisghansen/pfsense_fauxapi_php_client](https://packagist.org/packages/travisghansen/pfsense_fauxapi_php_client)
 
 
 ## API Authentication
@@ -136,9 +141,12 @@ FauxAPI `/etc/fauxapi/credentials.ini` file - happy to receive feedback about
 this approach.
 
 The two sample FauxAPI keys (PFFAexample01 and PFFAexample02) and their 
-associated secrets in the sample `credentials.ini` file are hard-coded to be
-inoperative, you must create entirely new values before your client scripts
+associated secrets in the sample `credentials.sample.ini` file are hard-coded to 
+be inoperative, you must create entirely new values before your client scripts
 will be able to issue commands to FauxAPI.
+
+You can start your own `/etc/fauxapi/credentials.ini` file by copying the sample
+file provided in `credentials.sample.ini`
 
 API authentication itself is performed on a per-call basis with the auth value 
 inserted as an additional **fauxapi-auth** HTTP request header, it can be 
@@ -578,6 +586,8 @@ curl \
  - Functions to be called via this interface *MUST* be defined in the file 
    `/etc/pfsense_function_calls.txt` only a handful very basic and 
    read-only pfSense functions are enabled by default.
+ - You can start your own `/etc/fauxapi/pfsense_function_calls.txt` file by 
+   copying the sample file provided in `pfsense_function_calls.sample.txt`
  - HTTP: **POST**
  - Params: none
 
